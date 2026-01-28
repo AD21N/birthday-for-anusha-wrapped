@@ -126,7 +126,7 @@ const SentimentalLetter: React.FC<SlideProps> = ({ onNext }) => {
                </p>
 
                <p className="text-base md:text-lg">
-                 I know I spent the last 10 slides roasting your driving skills and your indecisiveness about dinner, but the truth is, I wouldn't trade any of it for the world.
+                 I know I make alot of mistakes got angry to you yelled at you multiple time, I deserves life sentences I annoy you I roast you but I wouldn't trade any of it for the world.
                </p>
 
                <p className="text-base md:text-lg">
@@ -134,7 +134,7 @@ const SentimentalLetter: React.FC<SlideProps> = ({ onNext }) => {
                </p>
 
                <p className="text-base md:text-lg">
-                 Here is to another year of chaos, laughter, and me waiting for you to get ready.
+                 Here is to another year of chaos, laughter, and me waiting for you to make me chai (Mene tmhary haath ki chai peeniii).
                </p>
 
                <p className="font-messy text-xl md:text-2xl mt-8 text-right">

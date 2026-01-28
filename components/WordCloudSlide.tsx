@@ -10,16 +10,17 @@ const PHRASES = [
   { text: "What are we doing? 🤔", color: "text-green-600", size: "text-xl md:text-3xl", speed: 1.8 },
   { text: "Can we go home? 🏠", color: "text-pink-600", size: "text-2xl md:text-4xl", speed: 2.2 },
   { text: "Look at my hairs! ", color: "text-orange-500", size: "text-xl md:text-3xl", speed: 2.8 },
-    { text: "Pararipurura pupararura ", color: "text-orange-500", size: "text-xl md:text-3xl", speed: 2.8 },
-
+  { text: "Pararipurura pupararura ", color: "text-orange-500", size: "text-xl md:text-3xl", speed: 2.8 },
 ];
 
 const WordCloudSlide: React.FC<SlideProps> = ({ onNext }) => {
   return (
     <div className="w-full h-full relative overflow-hidden bg-[#FFF3E0] cursor-pointer" onClick={onNext}>
-      {/* Title centered and above floaters */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-50 pointer-events-none mix-blend-multiply w-full px-4">
-        <h1 className="font-chunky text-4xl md:text-6xl text-black opacity-10 leading-tight break-words">MOST USED<br/>PHRASES</h1>
+      {/* Title centered - Adjusted z-index to stay behind words */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 px-4">
+        <h1 className="font-chunky text-4xl md:text-6xl text-black opacity-10 leading-tight text-center break-words select-none">
+          MOST USED<br/>PHRASES
+        </h1>
       </div>
 
       {PHRASES.map((phrase, i) => (
@@ -34,40 +35,48 @@ const WordCloudSlide: React.FC<SlideProps> = ({ onNext }) => {
 };
 
 const FloatingWord = ({ phrase, index }: { phrase: typeof PHRASES[0], index: number }) => {
-  // Use a safer range for mobile. 
-  // Desktop can handle ~600px spread, Mobile needs ~200px.
-  // We'll use a conservative estimate.
+  // 1. Responsive Spread Calculation
+  // We use a safe default if window isn't defined (SSR safety), then check width
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const spread = isMobile ? 150 : 600;
   
-  const xOffset = (Math.random() - 0.5) * spread; 
-  const yOffset = (Math.random() - 0.5) * spread;
+  // Reduced spread slightly for mobile so text doesn't get cut off
+  const spreadX = isMobile ? 100 : 400; 
+  const spreadY = isMobile ? 180 : 300; // More vertical space usually available on mobile
+  
+  // 2. Calculate random offset relative to CENTER (0,0)
+  const xOffset = (Math.random() - 0.5) * spreadX * 2; 
+  const yOffset = (Math.random() - 0.5) * spreadY * 2;
   
   return (
-    <motion.div
-      className={`absolute font-chunky ${phrase.color} ${phrase.size} whitespace-nowrap drop-shadow-md`}
-      style={{
-        top: '50%',
-        left: '50%',
-        zIndex: index + 1
-      }}
-      initial={{ x: xOffset, y: yOffset, opacity: 0, scale: 0 }}
-      animate={{ 
-        x: [xOffset, xOffset + (Math.random() * 60 - 30), xOffset],
-        y: [yOffset, yOffset + (Math.random() * 60 - 30), yOffset],
-        opacity: 1,
-        scale: 1,
-        rotate: [0, 5, -5, 0]
-      }}
-      transition={{ 
-        duration: 5 + index, 
-        repeat: Infinity, 
-        ease: "easeInOut",
-        delay: index * 0.2
-      }}
+    // WRAPPER: This is the fix.
+    // We position a 0x0 div at the exact center (top-1/2 left-1/2).
+    // Flexbox ensures the content inside stays centered on this anchor point.
+    <div 
+      className="absolute top-1/2 left-1/2 w-0 h-0 flex items-center justify-center pointer-events-none" 
+      style={{ zIndex: index + 10 }}
     >
-      {phrase.text}
-    </motion.div>
+      <motion.div
+        className={`font-chunky ${phrase.color} ${phrase.size} whitespace-nowrap drop-shadow-md text-center`}
+        initial={{ x: xOffset, y: yOffset, opacity: 0, scale: 0 }}
+        animate={{ 
+          // Floating animation
+          x: [xOffset, xOffset + (Math.random() * 30 - 15), xOffset],
+          y: [yOffset, yOffset + (Math.random() * 30 - 15), yOffset],
+          opacity: 1,
+          scale: 1,
+          rotate: [0, Math.random() * 10 - 5, 0]
+        }}
+        transition={{ 
+          duration: 4 + Math.random() * 2, // Varied speeds
+          repeat: Infinity, 
+          repeatType: "reverse",
+          ease: "easeInOut",
+          delay: index * 0.1
+        }}
+      >
+        {phrase.text}
+      </motion.div>
+    </div>
   );
 };
 

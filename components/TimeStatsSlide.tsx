@@ -2,18 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
 import { SlideProps } from '../types';
 
-const TimeStatsSlide: React.FC<SlideProps> = ({ data, onNext }) => {
+// Removed 'data' from props to fix the build error
+const TimeStatsSlide: React.FC<SlideProps> = ({ onNext }) => {
   const [finished, setFinished] = useState(false);
   
-  // Spring animation for the number
   const count = useSpring(0, { duration: 2500, bounce: 0 });
   const rounded = useTransform(count, (latest) => Math.round(latest));
 
   useEffect(() => {
-    // Start counting
     count.set(1400);
-    
-    // Trigger finish state
     const timer = setTimeout(() => {
       setFinished(true);
     }, 2600);
@@ -32,14 +29,13 @@ const TimeStatsSlide: React.FC<SlideProps> = ({ data, onNext }) => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="z-10 text-center w-full"
+        className="z-10 text-center w-full relative"
       >
         <h2 className="font-messy text-xl md:text-4xl text-green-400 mb-8 px-4">
           Waiting to meet you everyday...
         </h2>
 
         <div className="relative inline-block">
-          {/* Responsive Number Size */}
           <motion.h1 
             className="font-chunky text-6xl md:text-9xl tracking-tighter"
             animate={finished ? { 
@@ -56,7 +52,11 @@ const TimeStatsSlide: React.FC<SlideProps> = ({ data, onNext }) => {
               initial={{ scale: 0, rotate: -10 }}
               animate={{ scale: 1, rotate: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="absolute -bottom-16 left-1/2 -translate-x-1/2 bg-yellow-400 text-black font-messy text-lg md:text-2xl px-4 md:px-6 py-2 border-4 border-white shadow-[4px_4px_0px_#fff] whitespace-nowrap"
+              // FIX EXPLANATION:
+              // 1. 'top-full mt-4': Pushes it below the number reliably.
+              // 2. 'left-1/2 -translate-x-1/2': Centers it horizontally perfectly.
+              // 3. 'max-w-[90vw]': Ensures it never gets wider than the mobile screen.
+              className="absolute top-full mt-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-black font-messy text-lg md:text-2xl px-4 py-2 border-4 border-white shadow-[4px_4px_0px_#fff] text-center w-max max-w-[90vw] leading-tight z-20"
             >
               but when we meet worth every second though 💖
             </motion.div>
