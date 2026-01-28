@@ -12,39 +12,49 @@ const MusicPlayer: React.FC = () => {
 
     audio.volume = 0.5;
 
-    // Function to try playing
-    const tryPlay = () => {
-        audio.play()
-            .then(() => {
-                setIsPlaying(true);
-                // Remove listeners if successful
-                document.removeEventListener('click', tryPlay);
-                document.removeEventListener('touchstart', tryPlay);
-                document.removeEventListener('keydown', tryPlay);
-            })
-            .catch((e) => {
-                console.log("Autoplay blocked, waiting for interaction...");
-                setIsPlaying(false);
-            });
+    const playMusic = async () => {
+      try {
+        await audio.play();
+        setIsPlaying(true);
+        // If it works, remove ALL listeners immediately
+        removeListeners();
+      } catch (err) {
+        console.log("Browser blocked autoplay. Waiting for user interaction...");
+        setIsPlaying(false);
+      }
     };
 
-    // Try immediately on mount
-    tryPlay();
+    // 1. Try to play immediately on load
+    playMusic();
 
-    // Add listeners for ANY interaction to start music (Preloader clicks, swipes, keys)
-    document.addEventListener('click', tryPlay);
-    document.addEventListener('touchstart', tryPlay);
-    document.addEventListener('keydown', tryPlay);
+    // 2. List of every possible interaction that counts as "user activity"
+    const events = [
+      'click', 
+      'touchstart', 
+      'keydown', 
+      'mousemove', 
+      'scroll', 
+      'focus'
+    ];
+
+    const removeListeners = () => {
+      events.forEach(event => {
+        document.removeEventListener(event, playMusic);
+      });
+    };
+
+    // Add listeners for everything
+    events.forEach(event => {
+      document.addEventListener(event, playMusic, { once: true });
+    });
 
     return () => {
-      document.removeEventListener('click', tryPlay);
-      document.removeEventListener('touchstart', tryPlay);
-      document.removeEventListener('keydown', tryPlay);
+      removeListeners();
     };
   }, []);
 
   const togglePlay = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering slide navigation
+    e.stopPropagation(); 
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -58,10 +68,7 @@ const MusicPlayer: React.FC = () => {
 
   return (
     <>
-      {/* 
-        IMPORTANT: Ensure your file is named 'song.mp3' and placed in the 'public' folder 
-        autoPlay attribute helps browsers that allow it
-      */}
+      {/* Added 'muted={false}' explicitly */}
       <audio ref={audioRef} src="/song.mp3" loop autoPlay />
 
       <motion.button
